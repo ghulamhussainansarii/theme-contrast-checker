@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "theme-contrast-checker"
+version = "0.1.0"
+description = "WCAG contrast checker for Shopify theme and web accessibility: AA/AAA contrast ratios for theme colours"
+authors = [{name = "Muhammad Ghulam Hussain"}]
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+theme-contrast-checker = "theme_contrast_checker.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["theme_contrast_checker*"]

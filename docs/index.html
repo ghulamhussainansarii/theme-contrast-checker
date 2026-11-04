@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theme Contrast Checker — WCAG AA / AAA Contrast Ratio Checker</title>
+<meta name="description" content="Free WCAG contrast checker for Shopify themes and web accessibility. Check AA and AAA contrast ratios for any foreground and background colour, no install needed.">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, sans-serif; line-height: 1.5; color: #111; background: #fff; }
+  main { max-width: 720px; margin: 0 auto; padding: 16px; width: 100%; }
+  h1 { font-size: 1.6rem; line-height: 1.2; }
+  .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin: 16px 0; }
+  label { display: block; font-weight: 600; margin: 12px 0 4px; }
+  input[type="text"] { width: 100%; min-height: 44px; padding: 10px; font-size: 1rem; border: 1px solid #888; border-radius: 8px; }
+  input[type="color"] { width: 100%; height: 44px; padding: 2px; border: 1px solid #888; border-radius: 8px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .row { grid-template-columns: 1fr; } h1 { font-size: 1.35rem; } }
+  button { min-height: 44px; padding: 10px 16px; font-size: 1rem; border-radius: 8px; border: 1px solid #111; background: #111; color: #fff; cursor: pointer; width: 100%; margin-top: 12px; }
+  .preview { padding: 16px; border-radius: 8px; margin-top: 12px; font-size: 1.1rem; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 4px; border-bottom: 1px solid #ddd; }
+  .pass { color: #0a6b1a; font-weight: 700; }
+  .fail { color: #a00; font-weight: 700; }
+  .error { color: #a00; font-weight: 600; }
+  @media (min-width: 768px) { main { padding: 24px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Theme Contrast Checker</h1>
+  <p>Check the WCAG contrast ratio for a Shopify theme or website colour pair. Enter a foreground and a background colour to see AA and AAA results instantly. No install, no data leaves your device.</p>
+
+  <section class="card" aria-label="Contrast checker">
+    <div class="row">
+      <div>
+        <label for="fg">Foreground colour</label>
+        <input id="fg" type="text" value="#333333" inputmode="text" autocomplete="off">
+        <input id="fgPick" type="color" value="#333333" aria-label="Foreground colour picker">
+      </div>
+      <div>
+        <label for="bg">Background colour</label>
+        <input id="bg" type="text" value="#ffffff" inputmode="text" autocomplete="off">
+        <input id="bgPick" type="color" value="#ffffff" aria-label="Background colour picker">
+      </div>
+    </div>
+    <button id="checkBtn" type="button">Check contrast</button>
+    <p id="error" class="error" role="alert"></p>
+    <div id="preview" class="preview">Sample text in your colours</div>
+    <table aria-label="Contrast results">
+      <tr><th>Measure</th><th>Result</th></tr>
+      <tr><td>Contrast ratio</td><td id="ratio">—</td></tr>
+      <tr><td>AA, normal text (needs 4.5)</td><td id="aaN">—</td></tr>
+      <tr><td>AA, large text (needs 3.0)</td><td id="aaL">—</td></tr>
+      <tr><td>AAA, normal text (needs 7.0)</td><td id="aaaN">—</td></tr>
+      <tr><td>AAA, large text (needs 4.5)</td><td id="aaaL">—</td></tr>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Try these pairs</h2>
+    <table>
+      <tr><th>Pair</th><th>Ratio</th><th>AA normal</th></tr>
+      <tr><td>Black on white</td><td>21.00</td><td class="pass">PASS</td></tr>
+      <tr><td>Dark grey #333333 on white</td><td>12.63</td><td class="pass">PASS</td></tr>
+      <tr><td>Same colour #777777 on #777777</td><td>1.00</td><td class="fail">FAIL</td></tr>
+    </table>
+    <p>Same logic as the Python CLI in this project. For batch checks of many theme pairs, use the CLI with a JSON file — see the README.</p>
+  </section>
+</main>
+<script src="contrast.js"></script>
+<script>
+  const fg = document.getElementById("fg");
+  const bg = document.getElementById("bg");
+  const fgPick = document.getElementById("fgPick");
+  const bgPick = document.getElementById("bgPick");
+  function sync(pick, text) { pick.addEventListener("input", () => { text.value = pick.value; run(); }); }
+  sync(fgPick, fg); sync(bgPick, bg);
+  function mark(el, ok) { el.textContent = ok ? "PASS" : "FAIL"; el.className = ok ? "pass" : "fail"; }
+  function run() {
+    const err = document.getElementById("error");
+    err.textContent = "";
+    try {
+      const r = checkContrast(fg.value, bg.value);
+      document.getElementById("ratio").textContent = r.ratio.toFixed(2);
+      mark(document.getElementById("aaN"), r.aa_normal);
+      mark(document.getElementById("aaL"), r.aa_large);
+      mark(document.getElementById("aaaN"), r.aaa_normal);
+      mark(document.getElementById("aaaL"), r.aaa_large);
+      const p = document.getElementById("preview");
+      p.style.color = fg.value; p.style.backgroundColor = bg.value;
+    } catch (e) { err.textContent = e.message; }
+  }
+  document.getElementById("checkBtn").addEventListener("click", run);
+  run();
+</script>
+</body>
+</html>
